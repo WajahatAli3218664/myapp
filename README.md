@@ -4,7 +4,7 @@ Modern, premium barber shop template built with Next.js and Tailwind CSS. Featur
 
 ## Features
 
-- Next.js 14 with App Router
+- Next.js 14 with Apps Router
 - Tailwind CSS styling
 - Responsive design
 - Modern UI components
