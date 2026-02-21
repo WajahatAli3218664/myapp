@@ -15,12 +15,13 @@ const qdrantClient = new QdrantClient({
   apiKey: ENV.QDRANT_API_KEY,
 });
 
-const neonClient = neon(ENV.DATABASE_URL);
+// Neon client exposes a tagged template; no `.sql` property
+const sql = neon(ENV.DATABASE_URL);
 
 // Initialize Neon DB table for conversation history
 async function initializeDb() {
   try {
-    await neonClient.sql`
+    await sql`
       CREATE TABLE IF NOT EXISTS conversations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id TEXT,
@@ -129,7 +130,7 @@ async function queryQdrant(queryEmbedding: number[], topK: number = 3) {
 // Store conversation in Neon database
 async function storeConversation(userMessage: string, aiResponse: string, sessionId: string) {
   try {
-    await neonClient.sql`
+    await sql`
       INSERT INTO conversations (user_id, message, response, session_id)
       VALUES (${ENV.USER_ID}, ${userMessage}, ${aiResponse}, ${sessionId})
     `;

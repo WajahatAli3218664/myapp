@@ -84,4 +84,5 @@ async function searchInQdrant(query: string, limit: number = 3) {
   }
 }
 
-export { addDocumentToQdrant, addMultipleDocumentsToQdrant, searchInQdrant, Document };
+export type { Document };
+export { addDocumentToQdrant, addMultipleDocumentsToQdrant, searchInQdrant };

@@ -17,16 +17,9 @@ if (!qdrantUrl || !qdrantApiKey) {
   process.exit(1);
 }
 
-// Parse the URL to extract host and protocol
-const urlObj = new URL(qdrantUrl);
-const host = urlObj.hostname;
-const port = parseInt(urlObj.port) || (urlObj.protocol === 'https:' ? 443 : 6333);
-const isHttps = urlObj.protocol === 'https:';
-
+// Qdrant client accepts the full URL directly
 const qdrantClient = new QdrantClient({
-  host: host,
-  port: port,
-  protocol: isHttps ? 'https' : 'http',
+  url: qdrantUrl,
   apiKey: qdrantApiKey,
 });
 
