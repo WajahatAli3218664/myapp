@@ -1,0 +1,63 @@
+{
+  "brand": {
+    "logo": "/next.svg",
+    "name": "Slick Style Barbers"
+  },
+  "hero": {
+    "headline": "Premium Grooming for Modern Gentlemen",
+    "subheadline": "Sharp cuts. Clean fades. Refined beard work.",
+    "ctaLabel": "Book Appointment",
+    "ctaLink": "#contact",
+    "backgroundImage": "/window.svg"
+  },
+  "services": [
+    { "title": "Haircut, Wash & Style", "description": "30min service", "price": 37, "icon": "GiScissors" },
+    { "title": "Student Haircut Price", "description": "Full time students · 30min service", "price": 32, "icon": "GiScissors" },
+    { "title": "Beard Tidy-Up", "description": "15 min service", "price": 18, "icon": "GiBeard" }
+  ],
+  "gallery": [
+    { "src": "/window.svg", "alt": "Clean fade" },
+    { "src": "/globe.svg", "alt": "Classic cut" },
+    { "src": "/file.svg", "alt": "Beard shape" }
+  ],
+  "team": [
+    {
+      "name": "Sergio Taralunga",
+      "role": "Barber",
+      "image": "/Sergio Taralunga.jpg",
+      "bio": "Meet Barber Sergio—a master of his craft with over 8 years of experience in the art of barbering. Known for his meticulous attention to detail, Sergio isn't just a barber; he's a perfectionist at heart. His priority is ensuring you not only look but also feel your absolute best after every visit. Trust Sergio to elevate your grooming experience to the next level."
+    },
+    {
+      "name": "Kyri Mouis",
+      "role": "Barber",
+      "image": "/Kyri Mouis.jpg",
+      "bio": "Meet Kyri — With over 18 years of experience, Kyri is a passionate hairstylist at Russell's Barbers, dedicated to helping every client look and feel their best. Walk out of Russells Barbers with a transformed look and an undeniable boost in self-assurance, thanks to Kyri's creativity and expertise. Trust Kyri for a truly empowering haircut experience at Russell's Barbers."
+    }
+  ],
+  "features": [
+    { "title": "Professional Barbers", "text": "Years of experience and craft." },
+    { "title": "Premium Tools", "text": "Only trusted, high-grade equipment." },
+    { "title": "Personalized Service", "text": "Every client is unique." },
+    { "title": "Comfortable Environment", "text": "Relaxed, masculine atmosphere." }
+  ],
+  "interior": [
+    { "src": "/globe.svg", "alt": "Shop interior" },
+    { "src": "/next.svg", "alt": "Waiting area" },
+    { "src": "/vercel.svg", "alt": "Cutting station" }
+  ],
+  "testimonials": [
+    { "name": "A. Khan", "feedback": "Best fade I’ve had in years." },
+    { "name": "M. Ali", "feedback": "Professional and friendly team." }
+  ],
+  "faq": [
+    { "q": "Do you accept walk-ins?", "a": "Yes, when available. Booking recommended." },
+    { "q": "What products do you use?", "a": "Premium salon-grade products." }
+  ],
+  "contact": {
+    "address": "Russell’s Barbers Holborn, 19 Great Ormond Street, London, UK",
+    "phone": "07476494734",
+    "email": "russellsbarbers@gmail.com",
+    "bookingLink": "https://bookings.gettimely.com/russellsbarbers/book?uri=https%3A%2F%2Fbook.gettimely.com%2FBooking%2FLocation%2F92767%3Fmobile%3DTrue%26params%3D%25253fclient-login%25253dtrue",
+    "mapsLink": "https://maps.google.com"
+  }
+}
