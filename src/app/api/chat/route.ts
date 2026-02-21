@@ -100,16 +100,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (!sql) {
-      return new Response(JSON.stringify({
-        error: 'Database service is not configured properly'
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    // Initialize database if sql is available
+    if (sql) {
+      await initializeDb();
+    } else {
+      console.warn('Database not available, proceeding without conversation history');
     }
-
-    await initializeDb();
 
     const { message, sessionId = uuidv4() } = await request.json();
 
