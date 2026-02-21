@@ -3,7 +3,6 @@
   "buildCommand": "next build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "nodeVersion": "18.x",
   "env": {
     "GROQ_API_KEY": "@groq_api_key",
     "QDRANT_URL": "@qdrant_url",
