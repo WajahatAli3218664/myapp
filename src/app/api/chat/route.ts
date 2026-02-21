@@ -6,22 +6,39 @@ import { v4 as uuidv4 } from 'uuid';
 import { ENV } from '@/lib/env';
 import { embeddingService } from '@/lib/embeddings';
 
-const groq = new Groq({
-  apiKey: ENV.GROQ_API_KEY,
-});
+// Initialize clients with error handling for missing environment variables
+let groq: Groq | null = null;
+let qdrantClient: QdrantClient | null = null;
+let sql: any = null;
 
-const qdrantClient = new QdrantClient({
-  url: ENV.QDRANT_URL,
-  apiKey: ENV.QDRANT_API_KEY,
-});
+try {
+  groq = new Groq({
+    apiKey: ENV.GROQ_API_KEY,
+  });
+} catch (error) {
+  console.error('Failed to initialize Groq client:', error);
+}
 
-// Neon client exposes a tagged template; no `.sql` property
-const sql = neon(ENV.DATABASE_URL);
+try {
+  qdrantClient = new QdrantClient({
+    url: ENV.QDRANT_URL,
+    apiKey: ENV.QDRANT_API_KEY,
+  });
+} catch (error) {
+  console.error('Failed to initialize Qdrant client:', error);
+}
+
+try {
+  sql = neon(ENV.DATABASE_URL);
+} catch (error) {
+  console.error('Failed to initialize Neon SQL client:', error);
+}
 
 // Initialize Neon DB table for conversation history
 async function initializeDb() {
   try {
     // Ensure pgcrypto is available for gen_random_uuid()
+    // This command should only run if the extension doesn't exist already
     await sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`;
 
     await sql`
@@ -36,16 +53,62 @@ async function initializeDb() {
     `;
   } catch (error) {
     console.error('Error initializing database:', error);
+    // Don't throw error here since it's not critical to the main functionality
+    // The table might already exist, which is fine
   }
 }
 
 // Import the embedding service
 async function getEmbedding(text: string): Promise<number[]> {
-  return await embeddingService.getEmbedding(text);
+  try {
+    return await embeddingService.getEmbedding(text);
+  } catch (error) {
+    console.error('Error getting embedding:', error);
+    // Return a basic embedding if the service fails
+    const encoder = new TextEncoder();
+    const encoded = encoder.encode(text.toLowerCase());
+    const embedding: number[] = [];
+
+    // Simple hash-based approach to create a vector representation
+    for (let i = 0; i < 1536; i++) {
+      const charIndex = i % encoded.length;
+      embedding.push(Math.sin(encoded[charIndex] * (i + 1)));
+    }
+
+    return embedding;
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if all required services are available
+    if (!groq) {
+      return new Response(JSON.stringify({
+        error: 'Groq service is not configured properly'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (!qdrantClient) {
+      return new Response(JSON.stringify({
+        error: 'Qdrant service is not configured properly'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (!sql) {
+      return new Response(JSON.stringify({
+        error: 'Database service is not configured properly'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     await initializeDb();
 
     const { message, sessionId = uuidv4() } = await request.json();
@@ -92,8 +155,10 @@ export async function POST(request: NextRequest) {
 
     const responseText = chatCompletion.choices[0]?.message?.content || 'I had an issue generating a response. Please try again.';
 
-    // Store the conversation in Neon
-    await storeConversation(message, responseText, sessionId);
+    // Store the conversation in Neon (only if sql is available)
+    if (sql) {
+      await storeConversation(message, responseText, sessionId);
+    }
 
     return new Response(JSON.stringify({
       response: responseText,
@@ -119,6 +184,11 @@ export async function POST(request: NextRequest) {
 // Query Qdrant for relevant documents
 async function queryQdrant(queryEmbedding: number[], topK: number = 3) {
   try {
+    if (!qdrantClient) {
+      console.warn('Qdrant client not available, returning empty results');
+      return [];
+    }
+
     const response = await qdrantClient.search('barber_documents', {
       vector: queryEmbedding,
       limit: topK,
@@ -133,6 +203,11 @@ async function queryQdrant(queryEmbedding: number[], topK: number = 3) {
 // Store conversation in Neon database
 async function storeConversation(userMessage: string, aiResponse: string, sessionId: string) {
   try {
+    if (!sql) {
+      console.warn('SQL client not available, skipping conversation storage');
+      return;
+    }
+
     await sql`
       INSERT INTO conversations (user_id, message, response, session_id)
       VALUES (${ENV.USER_ID}, ${userMessage}, ${aiResponse}, ${sessionId})
