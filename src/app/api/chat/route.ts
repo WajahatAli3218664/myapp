@@ -21,6 +21,9 @@ const sql = neon(ENV.DATABASE_URL);
 // Initialize Neon DB table for conversation history
 async function initializeDb() {
   try {
+    // Ensure pgcrypto is available for gen_random_uuid()
+    await sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`;
+
     await sql`
       CREATE TABLE IF NOT EXISTS conversations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
