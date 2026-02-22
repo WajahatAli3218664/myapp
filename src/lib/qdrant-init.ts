@@ -2,6 +2,7 @@ import { QdrantClient } from '@qdrant/js-client-rest';
 import * as dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 // Get the current directory and load environment variables from .env.local file
 const __filename = fileURLToPath(import.meta.url);
@@ -45,47 +46,53 @@ async function initializeQdrant() {
       console.log('Qdrant collection already exists: barber_documents');
     }
 
-    // Sample documents to add to the vector database (these would come from your real data)
+    // Load actual business data from site.json
+    const siteDataPath = path.resolve(__dirname, '../../data/site.json');
+    let siteData;
+
+    try {
+      const siteDataRaw = fs.readFileSync(siteDataPath, 'utf8');
+      siteData = JSON.parse(siteDataRaw);
+    } catch (error) {
+      console.error('Error reading site.json:', error);
+      throw new Error('Could not read site.json file. Please ensure it exists and is valid JSON.');
+    }
+
+    // Create documents from the actual business data
     const documents = [
       {
         id: 1,
-        content: `Slick Style — Premium Barber offers a range of services including haircuts, styling, beard grooming, hot towel shaves, and premium hair products. Our experienced barbers provide top-notch grooming services in a modern, comfortable environment.`
+        content: `Business Name: ${siteData.brand.name}. ${siteData.hero.headline}. ${siteData.hero.subheadline}`
       },
+      // Services
+      ...siteData.services.map((service, index) => ({
+        id: index + 2,
+        content: `Service: ${service.title}. ${service.description}. Price: $${service.price}.`
+      })),
+      // Team members
+      ...siteData.team.map((member, index) => ({
+        id: siteData.services.length + 2 + index,
+        content: `Barber: ${member.name}, Role: ${member.role}. ${member.bio}`
+      })),
+      // Features
+      ...siteData.features.map((feature, index) => ({
+        id: siteData.services.length + siteData.team.length + 2 + index,
+        content: `Feature: ${feature.title}. ${feature.text}`
+      })),
+      // Testimonials
+      ...siteData.testimonials.map((testimonial, index) => ({
+        id: siteData.services.length + siteData.team.length + siteData.features.length + 2 + index,
+        content: `Customer: ${testimonial.name}. Feedback: ${testimonial.feedback}`
+      })),
+      // FAQ
+      ...siteData.faq.map((faq, index) => ({
+        id: siteData.services.length + siteData.team.length + siteData.features.length + siteData.testimonials.length + 2 + index,
+        content: `Q: ${faq.q} A: ${faq.a}`
+      })),
+      // Contact information
       {
-        id: 2,
-        content: `Our premium haircut service includes a consultation, professional cut, style, and finishing touches. We use high-quality products and tools to ensure your hair looks its best. Our barbers are trained in the latest trends and classic techniques.`
-      },
-      {
-        id: 3,
-        content: `We offer beard grooming services including trimming, shaping, hot towel treatment, and styling. Our beard grooming service helps maintain a clean, professional look while keeping your facial hair healthy.`
-      },
-      {
-        id: 4,
-        content: `Our hot towel shave service is a premium grooming experience that includes a pre-shave oil, hot towels, straight razor shave, cooling treatment, and post-shave balm. This traditional service provides a close, smooth shave with maximum comfort.`
-      },
-      {
-        id: 5,
-        content: `We offer various packages such as the Classic Barber Package, Premium Grooming Experience, and Monthly Membership options. Packages include multiple services at a discounted rate.`
-      },
-      {
-        id: 6,
-        content: `To book an appointment, visit our website, call us directly, or use our online booking system. We recommend booking at least 24-48 hours in advance for peak times. Walk-ins are welcome but may have longer wait times.`
-      },
-      {
-        id: 7,
-        content: `We are located at the heart of the city with easy parking available. Our barbershop features a modern, sleek design with comfortable seating, premium amenities, and a relaxing atmosphere.`
-      },
-      {
-        id: 8,
-        content: `We use only premium hair and grooming products from trusted brands. Our product selection includes shampoos, conditioners, styling products, beard oils, and after-shave treatments. All products are available for purchase.`
-      },
-      {
-        id: 9,
-        content: `We offer special services for special occasions including wedding packages, grooming for events, and group appointments. Please contact us in advance to discuss your specific needs and requirements.`
-      },
-      {
-        id: 10,
-        content: `Our barbers are professionally trained and certified with years of experience. They stay updated with the latest trends and techniques through ongoing training and education. Each barber has their own specialties and style.`
+        id: siteData.services.length + siteData.team.length + siteData.features.length + siteData.testimonials.length + siteData.faq.length + 2,
+        content: `Contact Info: Address: ${siteData.contact.address}. Phone: ${siteData.contact.phone}. Email: ${siteData.contact.email}.`
       }
     ];
 
