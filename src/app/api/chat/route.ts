@@ -1,35 +1,46 @@
 import { NextRequest } from 'next/server';
-import Groq from 'groq-sdk';
+import { Anthropic } from '@anthropic-ai/sdk';
 import { neon } from '@neondatabase/serverless';
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { v4 as uuidv4 } from 'uuid';
-import { ENV } from '@/lib/env';
 import { embeddingService } from '@/lib/embeddings';
 
+// Define a simple ENV object using process.env for backwards compatibility
+const ENV = {
+  USER_ID: process.env.USER_ID || 'default',
+};
+
 // Initialize clients with error handling for missing environment variables
-let groq: Groq | null = null;
+let anthropic: Anthropic | null = null;
 let qdrantClient: QdrantClient | null = null;
 let sql: any = null;
 
+// Initialize Anthropic client using Netlify AI Gateway
 try {
-  groq = new Groq({
-    apiKey: ENV.GROQ_API_KEY,
+  anthropic = new Anthropic({
+    // Netlify AI Gateway automatically provides these, no API key needed
+    apiKey: process.env.ANTHROPIC_API_KEY || 'dummy-key-for-netlify-gateway',
+    baseURL: process.env.ANTHROPIC_BASE_URL || 'https://gateway.netlify.ai/anthropic/v1',
   });
 } catch (error) {
-  console.error('Failed to initialize Groq client:', error);
+  console.error('Failed to initialize Anthropic client:', error);
 }
 
 try {
-  qdrantClient = new QdrantClient({
-    url: ENV.QDRANT_URL,
-    apiKey: ENV.QDRANT_API_KEY,
-  });
+  if (process.env.QDRANT_URL && process.env.QDRANT_API_KEY) {
+    qdrantClient = new QdrantClient({
+      url: process.env.QDRANT_URL,
+      apiKey: process.env.QDRANT_API_KEY,
+    });
+  }
 } catch (error) {
   console.error('Failed to initialize Qdrant client:', error);
 }
 
 try {
-  sql = neon(ENV.DATABASE_URL);
+  if (process.env.DATABASE_URL) {
+    sql = neon(process.env.DATABASE_URL);
+  }
 } catch (error) {
   console.error('Failed to initialize Neon SQL client:', error);
 }
@@ -81,10 +92,10 @@ async function getEmbedding(text: string): Promise<number[]> {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if all required services are available
-    if (!groq) {
+    // Check if Anthropic service is available
+    if (!anthropic) {
       return new Response(JSON.stringify({
-        error: 'Groq service is not configured properly'
+        error: 'Anthropic service is not configured properly'
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
@@ -92,12 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!qdrantClient) {
-      return new Response(JSON.stringify({
-        error: 'Qdrant service is not configured properly'
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      console.warn('Qdrant client not available, proceeding without context');
     }
 
     // Initialize database if sql is available
@@ -137,19 +143,18 @@ export async function POST(request: NextRequest) {
     Context:
     ${contextText}`;
 
-    // Get response from Groq
-    const chatCompletion = await groq.chat.completions.create({
+    // Get response from Anthropic via Netlify AI Gateway
+    const chatCompletion = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001', // Using Claude Haiku model via Netlify Gateway
+      max_tokens: 1024,
+      temperature: 0.7,
+      system: systemPrompt,
       messages: [
-        { role: 'system', content: systemPrompt },
         { role: 'user', content: message },
       ],
-      model: 'llama-3.1-8b-instant', // Using Llama 3.1 model from Groq
-      temperature: 0.7,
-      max_tokens: 1024,
-      stream: false,
     });
 
-    const responseText = chatCompletion.choices[0]?.message?.content || 'I had an issue generating a response. Please try again.';
+    const responseText = chatCompletion.content[0]?.type === 'text' ? chatCompletion.content[0].text : 'I had an issue generating a response. Please try again.';
 
     // Store the conversation in Neon (only if sql is available)
     if (sql) {

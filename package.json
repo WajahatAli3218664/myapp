@@ -10,6 +10,7 @@
     "init-db": "tsx src/lib/qdrant-init.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@google/model-viewer": "^4.1.0",
     "@neondatabase/serverless": "^0.10.4",
     "@qdrant/js-client-rest": "^1.12.0",
