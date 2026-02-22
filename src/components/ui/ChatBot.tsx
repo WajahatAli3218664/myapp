@@ -111,10 +111,10 @@ const ChatBot = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleChat}
-            className="fixed bottom-8 right-8 z-50 flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl hover:shadow-blue-500/30 focus:outline-none"
+            className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-full shadow-2xl hover:shadow-blue-500/30 focus:outline-none sm:bottom-8 sm:right-8 sm:w-16 sm:h-16"
             aria-label="Open chat"
           >
-            <FiMessageSquare className="text-2xl" />
+            <FiMessageSquare className="text-xl sm:text-2xl" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -126,32 +126,32 @@ const ChatBot = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed bottom-8 right-8 z-50 w-full max-w-md h-[70vh] max-h-[600px] bg-white dark:bg-stone-800 rounded-2xl shadow-2xl flex flex-col border border-gray-200 dark:border-stone-700 overflow-hidden"
+            className="fixed bottom-4 left-4 right-4 z-50 w-full max-w-lg mx-auto h-[70vh] max-h-[600px] bg-white dark:bg-stone-800 rounded-2xl shadow-2xl flex flex-col border border-gray-200 dark:border-stone-700 overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
-              <h3 className="font-semibold text-lg">Slick Style Barber Assistant</h3>
+            <div className="flex items-center justify-between p-3 sm:p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+              <h3 className="font-semibold text-base sm:text-lg truncate">Slick Style Barber Assistant</h3>
               <button
                 onClick={toggleChat}
                 className="p-1 rounded-full hover:bg-blue-500 transition-colors"
                 aria-label="Close chat"
               >
-                <FiX className="text-xl" />
+                <FiX className="text-lg sm:text-xl" />
               </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-stone-900">
+            <div className="flex-1 overflow-y-auto p-2 sm:p-4 bg-gray-50 dark:bg-stone-900">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-4 text-gray-500 dark:text-stone-400">
-                  <FiMessageSquare className="text-4xl mb-3" />
-                  <h4 className="font-medium text-lg mb-2">Welcome to Slick Style!</h4>
-                  <p className="text-sm">
+                <div className="flex flex-col items-center justify-center h-full text-center p-3 sm:p-4 text-gray-500 dark:text-stone-400">
+                  <FiMessageSquare className="text-3xl sm:text-4xl mb-2" />
+                  <h4 className="font-medium text-base sm:text-lg mb-1">Welcome to Slick Style!</h4>
+                  <p className="text-xs sm:text-sm">
                     Ask me anything about our services, appointments, or barber tips. I'm here to help!
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 p-2 sm:space-y-4">
                   {messages.map((message) => (
                     <motion.div
                       key={message.id}
@@ -160,13 +160,13 @@ const ChatBot = () => {
                       className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                        className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 py-2 sm:px-4 sm:py-3 ${
                           message.role === 'user'
-                            ? 'bg-blue-600 text-white rounded-br-none'
-                            : 'bg-gray-200 dark:bg-stone-700 text-gray-800 dark:text-stone-100 rounded-bl-none'
+                            ? 'bg-blue-600 text-white rounded-br-none text-sm sm:text-base'
+                            : 'bg-gray-200 dark:bg-stone-700 text-gray-800 dark:text-stone-100 rounded-bl-none text-sm sm:text-base'
                         }`}
                       >
-                        <p className="whitespace-pre-wrap">{message.content}</p>
+                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
                         <p className="text-xs opacity-70 mt-1 text-right">
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
@@ -179,7 +179,7 @@ const ChatBot = () => {
                       animate={{ opacity: 1, y: 0 }}
                       className="flex justify-start"
                     >
-                      <div className="bg-gray-200 dark:bg-stone-700 text-gray-800 dark:text-stone-100 rounded-2xl rounded-bl-none px-4 py-3 max-w-[80%]">
+                      <div className="bg-gray-200 dark:bg-stone-700 text-gray-800 dark:text-stone-100 rounded-2xl rounded-bl-none px-3 py-2 sm:px-4 sm:py-3 max-w-[85%] sm:max-w-[80%] text-sm sm:text-base">
                         <div className="flex items-center space-x-2">
                           <FiLoader className="animate-spin" />
                           <span>Thinking...</span>
@@ -193,14 +193,14 @@ const ChatBot = () => {
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-gray-200 dark:border-stone-700 p-3 bg-white dark:bg-stone-800">
-              <div className="flex items-center space-x-2">
+            <div className="border-t border-gray-200 dark:border-stone-700 p-2 sm:p-3 bg-white dark:bg-stone-800">
+              <div className="flex items-end space-x-1 sm:space-x-2">
                 <textarea
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type your message..."
-                  className="flex-1 border border-gray-300 dark:border-stone-600 rounded-full py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-24"
+                  className="flex-1 border border-gray-300 dark:border-stone-600 rounded-full py-2 px-3 sm:py-3 sm:px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-20 text-sm sm:text-base"
                   rows={1}
                   disabled={isLoading}
                 />
@@ -209,14 +209,14 @@ const ChatBot = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSendMessage}
                   disabled={isLoading || !inputValue.trim()}
-                  className={`p-3 rounded-full ${
+                  className={`p-2 sm:p-3 rounded-full ${
                     isLoading || !inputValue.trim()
                       ? 'bg-gray-300 dark:bg-stone-600 text-gray-500 cursor-not-allowed'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                   aria-label="Send message"
                 >
-                  <FiSend />
+                  <FiSend className="text-sm sm:text-base" />
                 </motion.button>
               </div>
             </div>
