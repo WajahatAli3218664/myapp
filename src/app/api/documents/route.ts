@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { addMultipleDocumentsToQdrant, Document } from '@/lib/qdrant-utils';
-import { ENV } from '@/lib/env';
 
 // Only allow POST requests for adding documents
 export async function POST(request: NextRequest) {
@@ -9,7 +8,7 @@ export async function POST(request: NextRequest) {
     // For now, we'll just check for a specific header as a simple security measure
     const authHeader = request.headers.get('authorization');
 
-    if (authHeader !== `Bearer ${ENV.QDRANT_API_KEY}`) {
+    if (authHeader !== `Bearer ${process.env.QDRANT_API_KEY}`) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized: Invalid authorization header' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }

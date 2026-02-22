@@ -1,10 +1,14 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 
-// Initialize Qdrant client
-const qdrantClient = new QdrantClient({
-  url: process.env.QDRANT_URL!,
-  apiKey: process.env.QDRANT_API_KEY!,
-});
+// Initialize Qdrant client with error handling
+let qdrantClient: QdrantClient | null = null;
+
+if (process.env.QDRANT_URL && process.env.QDRANT_API_KEY) {
+  qdrantClient = new QdrantClient({
+    url: process.env.QDRANT_URL,
+    apiKey: process.env.QDRANT_API_KEY,
+  });
+}
 
 interface Document {
   id: number;
@@ -14,6 +18,11 @@ interface Document {
 
 async function addDocumentToQdrant(doc: Document) {
   try {
+    if (!qdrantClient) {
+      console.warn('Qdrant client not available, skipping document addition');
+      return;
+    }
+
     // Create a simple embedding based on the content (in real app, use proper embedding model)
     const embedding = Array(1536).fill(0).map(() => Math.random() * 2 - 1);
 
@@ -40,6 +49,11 @@ async function addDocumentToQdrant(doc: Document) {
 
 async function addMultipleDocumentsToQdrant(docs: Document[]) {
   try {
+    if (!qdrantClient) {
+      console.warn('Qdrant client not available, skipping document addition');
+      return;
+    }
+
     const points = docs.map((doc) => {
       // Create a simple embedding based on the content (in real app, use proper embedding model)
       const embedding = Array(1536).fill(0).map(() => Math.random() * 2 - 1);
@@ -68,6 +82,11 @@ async function addMultipleDocumentsToQdrant(docs: Document[]) {
 
 async function searchInQdrant(query: string, limit: number = 3) {
   try {
+    if (!qdrantClient) {
+      console.warn('Qdrant client not available, returning empty results');
+      return [];
+    }
+
     // Create a simple embedding for the query (in real app, use proper embedding model)
     const queryEmbedding = Array(1536).fill(0).map(() => Math.random() * 2 - 1);
 
